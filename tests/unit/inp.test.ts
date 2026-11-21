@@ -20,7 +20,7 @@ function itemErr(
 
 function discountErr(value: string): string | undefined {
   const q = quote({
-    lines: [item('l-1', { unitPrice: '9999999' }), discount('d-1', { amount: value })],
+    lines: [item('l-1', { quantity: '2', unitPrice: '9999999' }), discount('d-1', { amount: value })],
   })
   return validateQuote(q).lines['d-1']?.amount
 }
@@ -74,7 +74,7 @@ describe('入力（INP）', () => {
 
   test('TC-INP-007 明細の行数（1〜20）の境目', () => {
     const r0 = validateQuote(quote({ lines: [] }))
-    expect(r0.form).toContain(MSG.linesEmpty)
+    expect(r0.form).toEqual([MSG.linesEmpty])
     const r1 = validateQuote(quote({ lines: items(1) }))
     expect(r1.ok).toBe(true)
     expect(r1.form).toEqual([])
@@ -82,7 +82,7 @@ describe('入力（INP）', () => {
     expect(r20.ok).toBe(true)
     expect(r20.form).toEqual([])
     const r21 = validateQuote(quote({ lines: items(21) }))
-    expect(r21.form).toContain(MSG.linesTooMany)
+    expect(r21.form).toEqual([MSG.linesTooMany])
   })
 
   test('TC-INP-008 値引き行も明細の行数に数える', () => {
@@ -90,7 +90,7 @@ describe('入力（INP）', () => {
     expect(ok.ok).toBe(true)
     expect(ok.form).toEqual([])
     const ng = validateQuote(quote({ lines: [...items(20), discount('d-1', { amount: '1' })] }))
-    expect(ng.form).toContain(MSG.linesTooMany)
+    expect(ng.form).toEqual([MSG.linesTooMany])
   })
 
   test('TC-INP-009 数値の読み取り：受け付ける形', () => {
@@ -215,13 +215,21 @@ describe('入力（INP）', () => {
   })
 
   test('TC-INP-023 誤りの件数：宛先が空で明細が 0 行', () => {
-    const q = removeLine(quote({ recipient: '' }), 'l-1')
-    expect(q.lines).toEqual([])
-    const r = validateQuote(q)
+    const created = unwrap(createDraft(emptyData(), idGen()))
+    const draft = created.data.quotes.find((x) => x.id === created.id) as Quote
+    const lineId = (draft.lines[0] as Line).id
+    // 削除前：宛先、品名、単価の 3 件
+    expect(countErrors(validateQuote(draft))).toBe(3)
+
+    const removed = removeLine(draft, lineId)
+    expect(removed.lines).toEqual([])
+    const r = validateQuote(removed)
     expect(countErrors(r)).toBe(2)
     expect(r.fields.recipient).toBe(MSG.recipientEmpty)
     expect(r.form).toEqual([MSG.linesEmpty])
-    expect(r.lines).toEqual({})
+    // 削除した行の誤りは数えない
+    expect(r.lines[lineId]).toBeUndefined()
+    expect(Object.keys(r.lines)).toEqual([])
   })
 
   test('TC-INP-024 誤りの件数：宛先が空で 10% の値引きが超過', () => {

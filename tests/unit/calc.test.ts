@@ -70,7 +70,7 @@ describe('計算（CALC）', () => {
   })
 
   test('TC-CALC-009 誤りの数量は 0 として数える', () => {
-    // 「行の金額」は公開関数に出てこないため、合計側で 0 円になることを確かめる
+    // 1 行・値引きなしなので 10% の対象額 = 行の金額
     const t = calculateTotals([item('l-1', { quantity: 'abc', unitPrice: '1000' })])
     expect(t.byRate[0]).toEqual({ rate: 10, base: 0, tax: 0 })
     expect(t.total).toBe(0)
@@ -91,6 +91,11 @@ describe('計算（CALC）', () => {
 
   test('TC-CALC-011 最大の入力（10%）が 1 円もずれない', () => {
     const t = calculateTotals(items(20, { quantity: '9999', unitPrice: '9999999', taxRate: 10 }))
+    // 1 行・値引きなしなので 10% の対象額 = 行の金額
+    expect(
+      calculateTotals(items(1, { quantity: '9999', unitPrice: '9999999', taxRate: 10 })).byRate[0]
+        .base,
+    ).toBe(99989990001)
     expect(t.byRate[0].base).toBe(1999799800020)
     expect(t.byRate[0].tax).toBe(199979980002)
     expect(t.total).toBe(2199779780022)

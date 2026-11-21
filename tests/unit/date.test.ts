@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { addDays, endOfNextMonth, todayJst } from '@/domain/dates'
+import { addDays, endOfNextMonth, todayJst, VALID_DAYS } from '@/domain/dates'
 import { allowedActions, createInvoice, displayStatus, issueQuote } from '@/domain/workflow'
 import {
   addValidDraft,
@@ -13,22 +13,22 @@ import {
 
 describe('日付（DATE）', () => {
   test('TC-DATE-001 有効期限は発行日の 30 日後（30 日の月）', () => {
-    expect(addDays('2026-11-01', 30)).toBe('2026-12-01')
+    expect(addDays('2026-11-01', VALID_DAYS)).toBe('2026-12-01')
   })
 
   test('TC-DATE-002 有効期限：年またぎの境目', () => {
-    expect(addDays('2026-12-01', 30)).toBe('2026-12-31')
-    expect(addDays('2026-12-02', 30)).toBe('2027-01-01')
+    expect(addDays('2026-12-01', VALID_DAYS)).toBe('2026-12-31')
+    expect(addDays('2026-12-02', VALID_DAYS)).toBe('2027-01-01')
   })
 
   test('TC-DATE-003 有効期限：平年の 2 月をまたぐ', () => {
-    expect(addDays('2027-01-31', 30)).toBe('2027-03-02')
+    expect(addDays('2027-01-31', VALID_DAYS)).toBe('2027-03-02')
   })
 
   test('TC-DATE-004 有効期限：うるう年の 2 月', () => {
-    expect(addDays('2028-01-30', 30)).toBe('2028-02-29')
-    expect(addDays('2028-01-31', 30)).toBe('2028-03-01')
-    expect(addDays('2028-02-29', 30)).toBe('2028-03-30')
+    expect(addDays('2028-01-30', VALID_DAYS)).toBe('2028-02-29')
+    expect(addDays('2028-01-31', VALID_DAYS)).toBe('2028-03-01')
+    expect(addDays('2028-02-29', VALID_DAYS)).toBe('2028-03-30')
   })
 
   test('TC-DATE-005 支払期限は請求日の翌月の末日（月の初日）', () => {

@@ -40,17 +40,6 @@ export function issuedQuote(issuedOn: string, validUntil: string, o: Partial<Quo
   return quote({ status: 'issued', number: 'Q-0001', issuedOn, validUntil, ...o })
 }
 
-export function invoicedQuote(issuedOn: string, validUntil: string, o: Partial<Quote> = {}): Quote {
-  return quote({
-    status: 'invoiced',
-    number: 'Q-0001',
-    issuedOn,
-    validUntil,
-    invoiceId: 'inv-1',
-    ...o,
-  })
-}
-
 export function dataWith(
   quotes: Quote[] = [],
   counters: { quote: number; invoice: number } = { quote: 0, invoice: 0 },

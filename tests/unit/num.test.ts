@@ -34,7 +34,7 @@ describe('番号（NUM）', () => {
     const r = unwrap(createDraft(emptyData(), idGen()))
     const q = findQuote(r.data, r.id)
     // 「付いていない（空）」: null または空文字のどちらも空として扱う
-    expect(q.number === null || q.number === '').toBe(true)
+    expect([null, '']).toContain(q.number)
   })
 
   test('TC-NUM-003 下書きを削除しても欠番は出ない', () => {

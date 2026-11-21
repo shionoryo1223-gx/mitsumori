@@ -12,28 +12,37 @@ import {
   dataWith,
   findQuote,
   idGen,
-  invoicedQuote,
   issuedQuote,
   quote,
   unwrap,
 } from './helpers'
 
+// displayStatus depends only on status and dates, so a plain invoiced quote is enough here.
+function invoicedQuote(issuedOn: string, validUntil: string) {
+  return quote({ status: 'invoiced', number: 'Q-0001', issuedOn, validUntil })
+}
+
 describe('状態（ST）', () => {
+  // 「請求書を見る」「行の追加」は画面の操作で、TC-ST-012〜015 で確かめる。
+  // ここでは allowedActions と、アプリの操作でできた状態・ひも付きを確かめる。
   test('TC-ST-001 状態ごとの操作：下書き', () => {
-    const q = quote()
-    // 編集できる（行の追加は編集に含まれる）・削除できる・発行できる・請求書にできない
+    const { data, id } = addValidDraft(emptyData(), idGen())
+    const q = findQuote(data, id)
+    expect(q.status).toBe('draft')
     expect(allowedActions(q, '2026-11-21')).toEqual({
       edit: true,
       delete: true,
       issue: true,
       invoice: false,
     })
-    // 「請求書を見る」はない：請求書へのひも付きがない
     expect(q.invoiceId).toBeNull()
   })
 
   test('TC-ST-002 状態ごとの操作：発行済み（期限内）', () => {
-    const q = issuedQuote('2026-11-01', '2026-12-01')
+    const d = addValidDraft(emptyData(), idGen())
+    const r = unwrap(issueQuote(d.data, d.id, '2026-11-01'))
+    const q = findQuote(r.data, d.id)
+    expect(q.validUntil).toBe('2026-12-01')
     expect(allowedActions(q, '2026-11-21')).toEqual({
       edit: false,
       delete: false,
@@ -44,26 +53,37 @@ describe('状態（ST）', () => {
   })
 
   test('TC-ST-003 状態ごとの操作：期限切れ', () => {
-    const q = issuedQuote('2026-11-01', '2026-12-01')
-    // 理由の文言「有効期限を過ぎたため、請求書にできません」は画面の文言で、単体では確かめられない
+    const d = addValidDraft(emptyData(), idGen())
+    const r = unwrap(issueQuote(d.data, d.id, '2026-11-01'))
+    const q = findQuote(r.data, d.id)
+    // 理由の文言「有効期限を過ぎたため、請求書にできません」は画面の文言で、TC-ST-012〜015 側で確かめる
     expect(allowedActions(q, '2026-12-02')).toEqual({
       edit: false,
       delete: false,
       issue: false,
       invoice: false,
+    })
+    expect(createInvoice(r.data, d.id, '2026-12-02', idGen())).toEqual({
+      ok: false,
+      error: 'expired',
     })
   })
 
   test('TC-ST-004 状態ごとの操作：請求済み', () => {
-    const q = invoicedQuote('2026-11-01', '2026-12-01')
+    const newId = idGen()
+    const d = addValidDraft(emptyData(), newId)
+    const issued = unwrap(issueQuote(d.data, d.id, '2026-11-01'))
+    const r = unwrap(createInvoice(issued.data, d.id, '2026-11-02', newId))
+    const q = findQuote(r.data, d.id)
+    expect(q.status).toBe('invoiced')
     expect(allowedActions(q, '2026-12-02')).toEqual({
       edit: false,
       delete: false,
       issue: false,
       invoice: false,
     })
-    // 「請求書を見る」が使える：請求書へのひも付きがある
-    expect(q.invoiceId).not.toBeNull()
+    // 「請求書を見る」が使える：できた請求書へのひも付きがある
+    expect(q.invoiceId).toBe(r.id)
   })
 
   test('TC-ST-005 表示する状態の判定（5 通り）', () => {
@@ -141,20 +161,26 @@ describe('状態（ST）', () => {
   })
 
   test('TC-ST-011 期限切れ・請求済みでは請求書にできない', () => {
-    const expired = issuedQuote('2026-11-01', '2026-12-01', { id: 'q-exp' })
-    const invoiced = invoicedQuote('2026-11-01', '2026-12-01', { id: 'q-inv', number: 'Q-0002' })
-    const data = dataWith([expired, invoiced], { quote: 2, invoice: 1 })
-    const r1 = createInvoice(data, 'q-exp', '2026-12-02', idGen())
-    const r2 = createInvoice(data, 'q-inv', '2026-12-02', idGen())
-    for (const r of [r1, r2]) {
-      expect(r.ok).toBe(false)
-    }
-    // 成功扱いで返ってきても、データが変わっていないことを確かめる
-    for (const r of [r1, r2]) {
-      const after = r.ok ? r.data : data
-      expect(after.invoices).toHaveLength(data.invoices.length)
-    }
-    expect(findQuote(data, 'q-exp').status).toBe('issued')
-    expect(findQuote(data, 'q-inv').status).toBe('invoiced')
+    const newId = idGen()
+    // (1) 2026-11-01 に発行済み（期限切れになる）
+    const d1 = addValidDraft(emptyData(), newId)
+    const i1 = unwrap(issueQuote(d1.data, d1.id, '2026-11-01'))
+    // (2) 2026-11-01 に発行、2026-11-02 に請求した請求済み
+    const d2 = addValidDraft(i1.data, newId)
+    const i2 = unwrap(issueQuote(d2.data, d2.id, '2026-11-01'))
+    const inv = unwrap(createInvoice(i2.data, d2.id, '2026-11-02', newId))
+    const data = inv.data
+    const before = structuredClone(data)
+    expect(data.invoices).toHaveLength(1)
+    expect(data.counters).toEqual({ quote: 2, invoice: 1 })
+
+    expect(createInvoice(data, d1.id, '2026-12-02', newId)).toEqual({ ok: false, error: 'expired' })
+    expect(createInvoice(data, d2.id, '2026-12-02', newId)).toEqual({
+      ok: false,
+      error: 'not-issued',
+    })
+    expect(data).toEqual(before)
+    expect(findQuote(data, d1.id).status).toBe('issued')
+    expect(findQuote(data, d2.id).status).toBe('invoiced')
   })
 })
