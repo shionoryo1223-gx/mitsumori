@@ -12,6 +12,8 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+      e2e_ran: ${{ steps.e2e.outcome == 'success' || steps.e2e.outcome == 'failure' }}
     concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
@@ -27,29 +29,22 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
-      # Remove --pass-with-no-tests once e2e tests exist (Task 16).
-      - run: npm run e2e -- --pass-with-no-tests
+      - id: e2e
+        run: npm run e2e
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: playwright-report/
           if-no-files-found: ignore
-      - name: Ensure report folder exists
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          if [ ! -d playwright-report ]; then
-            mkdir playwright-report
-            echo '<!doctype html><meta charset="utf-8"><title>Playwright report</title><p>画面テストはまだありません。</p>' > playwright-report/index.html
-          fi
       - uses: actions/upload-pages-artifact@v3
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (steps.e2e.outcome == 'success' || steps.e2e.outcome == 'failure')
         with:
           path: playwright-report
 
   deploy-report:
     needs: test
-    if: always() && needs.test.result != 'cancelled' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: always() && needs.test.result != 'cancelled' && needs.test.outputs.e2e_ran == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     concurrency:
       group: pages
