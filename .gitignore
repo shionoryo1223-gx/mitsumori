@@ -4,3 +4,15 @@ test-results/
 playwright-report/
 .wrangler/
 docs/superpowers/
+*.log
+.DS_Store
+dist-ssr
+coverage
+*.local
+.eslintcache
+*.tsbuildinfo
+__screenshots__/
+*.timestamp-*-*.mjs
+.vscode/*
+!.vscode/extensions.json
+.idea
