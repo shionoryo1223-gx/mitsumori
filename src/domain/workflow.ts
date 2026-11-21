@@ -98,7 +98,7 @@ export function createInvoice(
     quoteNumber: q.number,
     recipient: q.recipient,
     subject: q.subject,
-    lines: structuredClone(q.lines),
+    lines: q.lines.map((line) => ({ ...line })),
     totals: calculateTotals(q.lines),
     invoicedOn: today,
     dueOn: endOfNextMonth(today),

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { reactive } from 'vue'
 import { calculateTotals } from './calc'
 import { endOfNextMonth } from './dates'
 import type { AppData, Quote } from './types'
@@ -179,6 +180,13 @@ describe('createInvoice', () => {
     expect(q.status).toBe('invoiced')
     expect(q.invoiceId).toBe(invoice.id)
     expect(r.data.counters.invoice).toBe(1)
+  })
+
+  it('copies lines even when the data is a Vue reactive proxy (as in the store)', () => {
+    const { data, id, newId } = issued()
+    const r = ok(createInvoice(reactive(data), id, '2026-11-22', newId))
+    const invoice = r.data.invoices.find((i) => i.id === r.id)!
+    expect(invoice.lines).toEqual(find(r.data, id).lines)
   })
 
   it('rejects the day after validUntil', () => {

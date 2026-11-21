@@ -1,0 +1,232 @@
+:root {
+  --color-text: #222;
+  --color-muted: #666;
+  --color-bg: #f4f4f1;
+  --color-paper: #fff;
+  --color-line: #b8b8b0;
+  --color-head: #ebebe5;
+  --color-accent: #2f4f6f;
+  --color-accent-text: #fff;
+  --color-error: #b3261e;
+  --color-error-bg: #fdecea;
+  --color-disabled: #d9d9d4;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --radius: 3px;
+  --font: system-ui, -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', Meiryo, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+a {
+  color: var(--color-accent);
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 var(--space-3);
+}
+h2 {
+  font-size: 1.1rem;
+  margin: var(--space-4) 0 var(--space-2);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+.app-header a {
+  color: var(--color-accent-text);
+}
+.app-name {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-head);
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.save-failed {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  font-weight: bold;
+}
+
+.page {
+  max-width: 960px;
+  margin: var(--space-3) auto;
+  padding: var(--space-3);
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+}
+
+button,
+input,
+select {
+  font: inherit;
+  font-size: 16px;
+}
+button {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-paper);
+  color: var(--color-text);
+  cursor: pointer;
+}
+button.primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+}
+button:disabled {
+  background: var(--color-disabled);
+  border-color: var(--color-disabled);
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+input,
+select {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-paper);
+  color: var(--color-text);
+}
+
+.field {
+  margin-bottom: var(--space-3);
+}
+.field label {
+  display: block;
+  font-weight: bold;
+}
+.field-error {
+  margin: var(--space-1) 0 0;
+  color: var(--color-error);
+  font-size: 0.9rem;
+}
+.form-errors {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-3);
+}
+
+.table-wrap {
+  position: relative;
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: var(--space-2);
+  border: 1px solid var(--color-line);
+  text-align: left;
+  vertical-align: top;
+}
+thead th {
+  background: var(--color-head);
+  white-space: nowrap;
+}
+.num {
+  text-align: right;
+}
+.lines td input,
+.lines td select {
+  min-width: 6rem;
+}
+.lines td:first-child input {
+  min-width: 10rem;
+}
+.discount-label {
+  vertical-align: middle;
+}
+.totals {
+  max-width: 480px;
+}
+.totals td {
+  text-align: right;
+}
+.grand-total th,
+.grand-total td {
+  font-weight: bold;
+  background: var(--color-head);
+}
+
+.meta {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-3);
+}
+.meta div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.meta dt {
+  min-width: 8rem;
+  color: var(--color-muted);
+}
+.meta dd {
+  margin: 0;
+}
+
+.status {
+  font-weight: bold;
+}
+.button-row,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.actions {
+  margin: var(--space-4) 0 var(--space-3);
+}
+.reason {
+  color: var(--color-error);
+}
+.empty {
+  padding: var(--space-4) 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
