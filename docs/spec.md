@@ -34,6 +34,7 @@
 | S-SCR-17 | 見積もり画面で「発行」を押すと、同じ見積もり画面にとどまり、状態が発行済みになる。 |
 | S-SCR-18 | 見積もり画面で「請求書にする」を押すと、できた請求書の画面（`#/invoices/:id`）に移る。 |
 | S-SCR-19 | hash のない URL（例：`/`）を開くと、見積もり一覧を表示する（`#/` と同じ）。 |
+| S-SCR-20 | 一覧の各行で、宛先（空のときは「（宛先なし）」）は、その見積もりを開くリンクにする。 |
 
 ## 2. 状態（ST）
 
@@ -191,6 +192,26 @@
 | S-STO-10 | 【削る候補】「見本を入れる」で入る見本は、ちょうど 3 件：下書き 1 件、発行済み 1 件（発行日は今日）、請求済み 1 件（発行も請求も今日）。 |
 | S-STO-11 | 【削る候補】見本の宛先は、すべて末尾が「（架空）」で終わる。 |
 | S-STO-12 | 【削る候補】見本の明細には、10% の明細、8% の明細、値引き行が含まれる。 |
+
+### 7.1 テストで使う取り決め
+
+テストが、アプリの作りを読まずに保存データを用意・確認できるようにするための決まり。
+
+| ID | 決まり |
+|---|---|
+| S-STO-13 | データは、ブラウザの localStorage の `mitsumori:v1` というキーに、JSON として保存する。 |
+| S-STO-14 | JSON の形は次のとおり。入力した値は、利用者が打った文字列のまま持つ。`counters` は最後に使った番号（0 はまだ使っていない）。 |
+
+```
+{ "version": 1, "quotes": Quote[], "invoices": Invoice[], "counters": { "quote": number, "invoice": number } }
+
+Quote   = { id, status: "draft"|"issued"|"invoiced", number: string|null, recipient, subject,
+            lines: Line[], issuedOn: "YYYY-MM-DD"|null, validUntil: "YYYY-MM-DD"|null, invoiceId: string|null }
+Line    = 明細 { id, kind: "item", name, quantity: string, unitPrice: string, taxRate: 10|8 }
+        | 値引き { id, kind: "discount", amount: string, taxRate: 10|8 }
+Invoice = { id, number, quoteId, quoteNumber, recipient, subject, lines: Line[],
+            totals: { byRate: [{rate:10, base, tax}, {rate:8, base, tax}], total }, invoicedOn, dueOn }
+```
 
 ## 8. 表示（DISP）
 
