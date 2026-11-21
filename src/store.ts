@@ -3,7 +3,7 @@ import { systemClock } from './domain/clock'
 import { todayJst } from './domain/dates'
 import type { AppData, IsoDate, Quote } from './domain/types'
 import * as workflow from './domain/workflow'
-import { loadData, resetData, saveData } from './storage/repository'
+import { loadData, resetData, resolveStorage, saveData } from './storage/repository'
 import { buildSampleData } from './storage/sampleData'
 
 interface State {
@@ -16,7 +16,7 @@ let state: State | null = null
 
 function getState(): State {
   if (state === null) {
-    const loaded = loadData(window.localStorage)
+    const loaded = loadData(storage())
     state = reactive<State>({
       data: loaded.status === 'ok' ? loaded.data : workflow.emptyData(),
       loadStatus: loaded.status,
@@ -26,11 +26,12 @@ function getState(): State {
   return state
 }
 
+const storage = () => resolveStorage(() => window.localStorage)
 const newId = (): string => crypto.randomUUID()
 const today = (): IsoDate => todayJst(systemClock.now())
 
 function persist(s: State): void {
-  if (!saveData(window.localStorage, s.data)) s.saveFailed = true
+  if (!saveData(storage(), s.data)) s.saveFailed = true
 }
 
 function apply(result: workflow.WorkflowResult): string | null {
@@ -66,7 +67,7 @@ export function useStore() {
       persist(s)
     },
     reset(): void {
-      resetData(window.localStorage)
+      resetData(storage())
       s.data = workflow.emptyData()
       s.loadStatus = 'ok'
       s.saveFailed = false

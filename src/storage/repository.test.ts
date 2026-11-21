@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { emptyData } from '../domain/workflow'
 import type { AppData } from '../domain/types'
-import { loadData, resetData, saveData, STORAGE_KEY, type KeyValueStorage } from './repository'
+import { loadData, resetData, resolveStorage, saveData, STORAGE_KEY, type KeyValueStorage } from './repository'
 
 function fakeStorage(initial?: string): KeyValueStorage & { map: Map<string, string> } {
   const map = new Map<string, string>()
@@ -75,6 +75,20 @@ describe('resetData', () => {
 
   it('ignores errors from removeItem', () => {
     const s: KeyValueStorage = { getItem: () => null, setItem: throwing, removeItem: throwing }
+    expect(() => resetData(s)).not.toThrow()
+  })
+})
+
+describe('resolveStorage', () => {
+  it('returns the given storage when access works', () => {
+    const s = fakeStorage()
+    expect(resolveStorage(() => s)).toBe(s)
+  })
+
+  it('returns a failing stub when access throws', () => {
+    const s = resolveStorage(throwing)
+    expect(loadData(s)).toEqual({ status: 'corrupted' })
+    expect(saveData(s, emptyData())).toBe(false)
     expect(() => resetData(s)).not.toThrow()
   })
 })

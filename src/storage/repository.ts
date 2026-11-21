@@ -57,3 +57,14 @@ export function resetData(s: KeyValueStorage): void {
     // Nothing more can be done if storage is unavailable.
   }
 }
+
+export function resolveStorage(get: () => KeyValueStorage): KeyValueStorage {
+  try {
+    return get()
+  } catch {
+    const fail = (): never => {
+      throw new Error('storage unavailable')
+    }
+    return { getItem: fail, setItem: fail, removeItem: fail }
+  }
+}
