@@ -1,7 +1,7 @@
 import type { DisplayStatus, IsoDate } from './domain/types'
 
 export function formatYen(n: number): string {
-  return n.toLocaleString('ja-JP') + '円'
+  return (n === 0 ? 0 : n).toLocaleString('ja-JP') + '円'
 }
 
 export function formatDate(d: IsoDate): string {

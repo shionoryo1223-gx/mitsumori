@@ -1,6 +1,7 @@
 import { reactive } from 'vue'
 import { systemClock } from './domain/clock'
 import { todayJst } from './domain/dates'
+import { newId } from './ids'
 import type { AppData, IsoDate, Quote } from './domain/types'
 import * as workflow from './domain/workflow'
 import { loadData, resetData, resolveStorage, saveData } from './storage/repository'
@@ -27,7 +28,6 @@ function getState(): State {
 }
 
 const storage = () => resolveStorage(() => window.localStorage)
-const newId = (): string => crypto.randomUUID()
 const today = (): IsoDate => todayJst(systemClock.now())
 
 function persist(s: State): void {

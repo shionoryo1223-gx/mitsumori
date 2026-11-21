@@ -8,6 +8,9 @@ describe('formatYen', () => {
   it('formats zero', () => {
     expect(formatYen(0)).toBe('0円')
   })
+  it('never prints negative zero', () => {
+    expect(formatYen(-0)).toBe('0円')
+  })
   it('keeps a half-width minus for negative amounts', () => {
     expect(formatYen(-200)).toBe('-200円')
   })

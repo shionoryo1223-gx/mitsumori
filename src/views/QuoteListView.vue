@@ -38,14 +38,14 @@ function createQuote(): void {
         </thead>
         <tbody>
           <tr v-for="q in store.state.data.quotes" :key="q.id" data-testid="quote-row">
-            <td>{{ statusLabel(displayStatus(q, store.today())) }}</td>
-            <td>{{ q.number ?? '—' }}</td>
+            <td data-testid="status">{{ statusLabel(displayStatus(q, store.today())) }}</td>
+            <td data-testid="quote-number">{{ q.number ?? '—' }}</td>
             <td>
               <RouterLink :to="`/quotes/${q.id}`">{{ q.recipient.trim() === '' ? '（宛先なし）' : q.recipient }}</RouterLink>
             </td>
             <td class="num">{{ formatYen(calculateTotals(q.lines).total) }}</td>
-            <td>{{ q.issuedOn ? formatDate(q.issuedOn) : '—' }}</td>
-            <td>{{ q.validUntil ? formatDate(q.validUntil) : '—' }}</td>
+            <td data-testid="issued-on">{{ q.issuedOn ? formatDate(q.issuedOn) : '—' }}</td>
+            <td data-testid="valid-until">{{ q.validUntil ? formatDate(q.validUntil) : '—' }}</td>
           </tr>
         </tbody>
       </table>

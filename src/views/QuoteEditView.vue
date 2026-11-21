@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TotalsTable from '../components/TotalsTable.vue'
 import { calculateTotals } from '../domain/calc'
@@ -9,6 +9,7 @@ import type { DiscountLine, ItemLine, Line, Quote, TaxRate } from '../domain/typ
 import { countErrors, MAX_LINES, validateQuote } from '../domain/validation'
 import { allowedActions, displayStatus } from '../domain/workflow'
 import { formatDate, formatYen, statusLabel } from '../format'
+import { newId } from '../ids'
 import { useStore } from '../store'
 import NotFoundView from './NotFoundView.vue'
 
@@ -17,7 +18,24 @@ const route = useRoute()
 const router = useRouter()
 
 const quote = computed(() => store.state.data.quotes.find((q) => q.id === route.params.id))
-const today = computed(() => store.today())
+// "Today" is refreshed on actions, on tab focus and every minute, so a screen left open past
+// the validity date switches to the expired state.
+const today = ref(store.today())
+const refreshToday = (): void => {
+  today.value = store.today()
+}
+const onVisibility = (): void => {
+  if (document.visibilityState === 'visible') refreshToday()
+}
+let timer: number | undefined
+onMounted(() => {
+  document.addEventListener('visibilitychange', onVisibility)
+  timer = window.setInterval(refreshToday, 60_000)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisibility)
+  window.clearInterval(timer)
+})
 const status = computed(() => (quote.value ? displayStatus(quote.value, today.value) : 'draft'))
 const actions = computed(() =>
   quote.value
@@ -49,18 +67,25 @@ function patchLine(lineId: string, patch: Partial<ItemLine> | Partial<DiscountLi
 }
 const inputValue = (e: Event): string => (e.target as HTMLInputElement | HTMLSelectElement).value
 const rateOf = (e: Event): TaxRate => (inputValue(e) === '8' ? 8 : 10)
-const newId = (): string => crypto.randomUUID()
 
 const amountOf = (value: string): number => parseInteger(value) ?? 0
 const itemAmount = (l: ItemLine): number => amountOf(l.quantity) * amountOf(l.unitPrice)
 
+const quantityText = (value: string): string => {
+  const n = parseInteger(value)
+  return n === null ? value : n.toLocaleString('ja-JP')
+}
+
 function issue(): void {
+  refreshToday()
   if (quote.value) store.issue(quote.value.id)
 }
 function makeInvoice(): void {
   if (!quote.value) return
+  refreshToday()
   const invoiceId = store.invoice(quote.value.id)
   if (invoiceId !== null) void router.push(`/invoices/${invoiceId}`)
+  else refreshToday()
 }
 function remove(): void {
   if (!quote.value) return
@@ -259,7 +284,7 @@ function viewInvoice(): void {
             <tr v-for="line in quote.lines" :key="line.id" data-testid="line-row">
               <template v-if="line.kind === 'item'">
                 <td>{{ line.name }}</td>
-                <td class="num">{{ line.quantity }}</td>
+                <td class="num">{{ quantityText(line.quantity) }}</td>
                 <td class="num">{{ formatYen(amountOf(line.unitPrice)) }}</td>
                 <td>{{ line.taxRate }}%</td>
                 <td class="num">{{ formatYen(itemAmount(line)) }}</td>
