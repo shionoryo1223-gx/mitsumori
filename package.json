@@ -14,7 +14,8 @@
                     "smoke":  "playwright test -c playwright.smoke.config.ts",
                     "lint":  "run-s \"lint:*\"",
                     "lint:oxlint":  "oxlint . --fix",
-                    "lint:eslint":  "eslint . --fix --cache"
+                    "lint:eslint":  "eslint . --fix --cache",
+                    "lint:ci":  "oxlint . && eslint . --cache"
                 },
     "dependencies":  {
                          "vue":  "^3.5.42",
