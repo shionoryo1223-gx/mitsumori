@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ReadOnlyLines from '../components/ReadOnlyLines.vue'
 import TotalsTable from '../components/TotalsTable.vue'
 import { calculateTotals } from '../domain/calc'
 import { addDiscountLine, addItemLine, removeLine } from '../domain/lines'
-import { parseInteger } from '../domain/parse'
 import type { DiscountLine, ItemLine, Line, Quote, TaxRate } from '../domain/types'
 import { countErrors, MAX_LINES, validateQuote } from '../domain/validation'
 import { allowedActions, displayStatus } from '../domain/workflow'
-import { formatDate, formatYen, statusLabel } from '../format'
+import { formatDate, statusLabel } from '../format'
 import { newId } from '../ids'
 import { useStore } from '../store'
 import NotFoundView from './NotFoundView.vue'
@@ -67,14 +67,6 @@ function patchLine(lineId: string, patch: Partial<ItemLine> | Partial<DiscountLi
 }
 const inputValue = (e: Event): string => (e.target as HTMLInputElement | HTMLSelectElement).value
 const rateOf = (e: Event): TaxRate => (inputValue(e) === '8' ? 8 : 10)
-
-const amountOf = (value: string): number => parseInteger(value) ?? 0
-const itemAmount = (l: ItemLine): number => amountOf(l.quantity) * amountOf(l.unitPrice)
-
-const quantityText = (value: string): string => {
-  const n = parseInteger(value)
-  return n === null ? value : n.toLocaleString('ja-JP')
-}
 
 function issue(): void {
   refreshToday()
@@ -269,35 +261,7 @@ function viewInvoice(): void {
         </div>
       </dl>
       <h2>明細</h2>
-      <div class="table-wrap">
-        <table class="lines">
-          <thead>
-            <tr>
-              <th scope="col">品名</th>
-              <th scope="col" class="num">数量</th>
-              <th scope="col" class="num">単価（税抜）</th>
-              <th scope="col">税率</th>
-              <th scope="col" class="num">金額</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="line in quote.lines" :key="line.id" data-testid="line-row">
-              <template v-if="line.kind === 'item'">
-                <td>{{ line.name }}</td>
-                <td class="num">{{ quantityText(line.quantity) }}</td>
-                <td class="num">{{ formatYen(amountOf(line.unitPrice)) }}</td>
-                <td>{{ line.taxRate }}%</td>
-                <td class="num">{{ formatYen(itemAmount(line)) }}</td>
-              </template>
-              <template v-else>
-                <td colspan="3">値引き</td>
-                <td>{{ line.taxRate }}%</td>
-                <td class="num">{{ formatYen(-amountOf(line.amount)) }}</td>
-              </template>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <ReadOnlyLines :lines="quote.lines" />
     </template>
 
     <h2>計算結果</h2>
