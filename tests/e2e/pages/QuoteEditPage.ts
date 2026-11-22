@@ -76,6 +76,7 @@ export class QuoteEditPage extends BasePage {
   readonly errorSummary: Locator
   readonly invoiceDisabledReason: Locator
   readonly saveFailedAlert: Locator
+  readonly saveButtons: Locator
 
   constructor(page: Page) {
     super(page)
@@ -98,6 +99,7 @@ export class QuoteEditPage extends BasePage {
     this.invoiceDisabledReason = page.getByText('有効期限を過ぎたため、請求書にできません', {
       exact: true,
     })
+    this.saveButtons = page.getByRole('button', { name: /保存/ })
     this.saveFailedAlert = page.getByRole('alert').filter({ hasText: '保存できませんでした。' })
   }
 
@@ -146,6 +148,11 @@ export class QuoteEditPage extends BasePage {
       button.click()
       button.click()
     })
+  }
+
+  // A real double click (two clicks in quick succession) on "発行".
+  async issueByDoubleClick(): Promise<void> {
+    await this.issueButton.dblclick()
   }
 
   async toInvoice(): Promise<void> {

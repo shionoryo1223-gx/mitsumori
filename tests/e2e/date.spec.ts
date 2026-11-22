@@ -30,7 +30,7 @@ test('TC-DATE-018 画面：有効期限の翌日は期限切れになり押せ�
 test.describe('端末の時刻帯が日本以外', () => {
   test.use({ timezoneId: 'America/Los_Angeles' })
 
-  test('TC-DATE-019 画面：端末が米国西海岸でも発行日は日本時間', async ({ page }) => {
+  test('TC-DATE-019 画面：端末が米国西海岸の時刻帯でも日本時間で日付が決まる', async ({ page }) => {
     // JST 2026-12-01 00:30:00 = UTC 2026-11-30 15:30:00 = Los Angeles 2026-11-30 07:30.
     await setNow(page, '2026-12-01T00:30:00+09:00')
     const edit = await createIssuedQuote(page)

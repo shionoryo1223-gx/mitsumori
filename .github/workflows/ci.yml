@@ -38,7 +38,7 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
       - uses: actions/upload-pages-artifact@v3
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (steps.e2e.outcome == 'success' || steps.e2e.outcome == 'failure')
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (steps.e2e.outcome == 'success' || steps.e2e.outcome == 'failure') && hashFiles('playwright-report/index.html') != ''
         with:
           path: playwright-report
 

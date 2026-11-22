@@ -5,6 +5,7 @@ export class BasePage {
   readonly notice: Locator
   readonly testDocsLink: Locator
   readonly backToListLink: Locator
+  readonly anyInvoiceNumberText: Locator
 
   constructor(readonly page: Page) {
     this.notice = page.getByText('ポートフォリオ用の練習アプリです。実際の取引には使えません。', {
@@ -12,6 +13,12 @@ export class BasePage {
     })
     this.testDocsLink = page.getByRole('link', { name: 'テスト資料', exact: true })
     this.backToListLink = page.getByRole('link', { name: '一覧に戻る', exact: true })
+    this.anyInvoiceNumberText = page.getByText(/INV-\d+/)
+  }
+
+  // Visible text that equals the given value exactly.
+  text(value: string): Locator {
+    return this.page.getByText(value, { exact: true })
   }
 
   async open(path: string): Promise<void> {

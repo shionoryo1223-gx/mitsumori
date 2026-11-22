@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { seedStorage, setNow, startDraft } from './helpers.ts'
+import { breakStorageWrites, seedStorage, setNow, startDraft } from './helpers.ts'
 import { QuoteEditPage } from './pages/QuoteEditPage.ts'
 import { QuoteListPage } from './pages/QuoteListPage.ts'
 
@@ -21,7 +21,7 @@ test('TC-STO-002 入力のたびに自動保存され、保存ボタンはない
   await edit.fillRecipient(RECIPIENT)
   await edit.fillSubject('4月分')
 
-  await expect(page.getByRole('button', { name: /保存/ })).toHaveCount(0)
+  await expect(edit.saveButtons).toHaveCount(0)
 
   await page.reload()
   const list = new QuoteListPage(page)
@@ -34,12 +34,7 @@ test('TC-STO-002 入力のたびに自動保存され、保存ボタンはない
 
 test('TC-STO-004 保存に失敗しても画面は止まらず、入力が残り、帯が出る', async ({ page }) => {
   await setNow(page)
-  // Make every localStorage write fail.
-  await page.addInitScript(() => {
-    Storage.prototype.setItem = () => {
-      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
-    }
-  })
+  await breakStorageWrites(page)
   const edit = await startDraft(page)
 
   await edit.fillRecipient(RECIPIENT)
@@ -53,11 +48,7 @@ test('TC-STO-004 保存に失敗しても画面は止まらず、入力が残り
 
 test('TC-STO-005 保存失敗の帯は消えずに出し続ける', async ({ page }) => {
   await setNow(page)
-  await page.addInitScript(() => {
-    Storage.prototype.setItem = () => {
-      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
-    }
-  })
+  await breakStorageWrites(page)
   const edit = await startDraft(page)
   await edit.fillRecipient(RECIPIENT)
   await expect(edit.saveFailedAlert).toHaveText('保存できませんでした。')

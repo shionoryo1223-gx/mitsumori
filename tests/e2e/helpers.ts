@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import { QuoteEditPage } from './pages/QuoteEditPage.ts'
 import { QuoteListPage } from './pages/QuoteListPage.ts'
 
@@ -28,6 +28,15 @@ export async function seedStorage(page: Page, raw: string): Promise<void> {
   )
 }
 
+// Makes every localStorage write fail (as when the quota is exceeded). Call before navigating.
+export async function breakStorageWrites(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
+    }
+  })
+}
+
 // Opens the list, creates a new draft through the UI and returns its edit page.
 export async function startDraft(page: Page): Promise<QuoteEditPage> {
   const list = new QuoteListPage(page)
@@ -46,7 +55,7 @@ export async function createIssuedQuote(
   const edit = await startDraft(page)
   await edit.fillValidDraft(values)
   await edit.issue()
-  await edit.statusCell.waitFor()
+  await expect(edit.statusCell).toHaveText('発行済み')
   return edit
 }
 

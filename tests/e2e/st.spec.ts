@@ -60,8 +60,8 @@ test('TC-ST-013 画面：発行済み（期限内）で出るボタン', async (
   await expect(edit.invoiceButton).toBeEnabled()
   await expectNoEditingButtons(edit)
   await expect(edit.viewInvoiceButton).toHaveCount(0)
-  await expect(page.getByText(RECIPIENT, { exact: true })).toBeVisible()
-  await expect(page.getByText('作業', { exact: true })).toBeVisible()
+  await expect(edit.text(RECIPIENT)).toBeVisible()
+  await expect(edit.text('作業')).toBeVisible()
   await expect(edit.editableControls()).toHaveCount(0)
 })
 
@@ -201,6 +201,7 @@ test('TC-ST-021 状態を戻す操作が画面にない', async ({ page }) => {
   const edit = new QuoteEditPage(page)
   await list.goto()
   await list.openByRecipient('甲社（架空）')
+  await expect(edit.heading).toBeVisible()
   await expect(edit.statusCell).toHaveText('発行済み')
   await expect(edit.buttons()).toHaveText(['請求書にする'])
   await expect(edit.invoiceButton).toBeEnabled()
@@ -209,6 +210,7 @@ test('TC-ST-021 状態を戻す操作が画面にない', async ({ page }) => {
 
   await edit.backToList()
   await list.openByRecipient('乙社（架空）')
+  await expect(edit.heading).toBeVisible()
   await expect(edit.statusCell).toHaveText('期限切れ')
   await expect(edit.buttons()).toHaveText(['請求書にする'])
   await expect(edit.invoiceButton).toBeDisabled()
@@ -217,6 +219,7 @@ test('TC-ST-021 状態を戻す操作が画面にない', async ({ page }) => {
 
   await edit.backToList()
   await list.openByRecipient('丙社（架空）')
+  await expect(edit.heading).toBeVisible()
   await expect(edit.statusCell).toHaveText('請求済み')
   await expect(edit.buttons()).toHaveText(['請求書を見る'])
   await expectLinks(edit)
@@ -261,7 +264,7 @@ test('TC-ST-025 「発行」をダブルクリックしても「請求書にす�
   const edit = await startDraft(page)
   await edit.fillValidDraft()
 
-  await edit.issueButton.dblclick()
+  await edit.issueByDoubleClick()
 
   await expect(edit.statusCell).toHaveText('発行済み')
   await expect(edit.quoteNumber).toHaveText('Q-0001')
@@ -273,5 +276,5 @@ test('TC-ST-025 「発行」をダブルクリックしても「請求書にす�
   await expect(list.rows).toHaveCount(1)
   await expect(list.cell(list.row(0), 'status')).toHaveText('発行済み')
   await expect(list.cell(list.row(0), 'quote-number')).toHaveText('Q-0001')
-  await expect(page.getByText(/INV-\d+/)).toHaveCount(0)
+  await expect(list.anyInvoiceNumberText).toHaveCount(0)
 })
