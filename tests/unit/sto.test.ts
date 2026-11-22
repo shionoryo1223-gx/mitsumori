@@ -40,6 +40,31 @@ describe('保存（STO）', () => {
     expect(loaded.data).toEqual(edited.data)
   })
 
+  test('TC-STO-013 保存に失敗しても saveData は例外を投げず false を返す', () => {
+    const failing: KeyValueStorage = {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error('QuotaExceededError')
+      },
+      removeItem: () => {},
+    }
+    let result: boolean | undefined
+    expect(() => {
+      result = saveData(failing, emptyData())
+    }).not.toThrow()
+    expect(result).toBe(false)
+  })
+
+  test('TC-STO-014 保存データがないとき loadData は空のデータで ok を返す', () => {
+    const loaded = loadData(memoryStorage())
+    expect(loaded.status).toBe('ok')
+    if (loaded.status !== 'ok') return
+    expect(loaded.data.version).toBe(1)
+    expect(loaded.data.quotes).toEqual([])
+    expect(loaded.data.invoices).toEqual([])
+    expect(loaded.data.counters).toEqual({ quote: 0, invoice: 0 })
+  })
+
   test('TC-STO-006 壊れた保存データを読めないと判定する', () => {
     const storage = memoryStorage()
     storage.setItem(STORAGE_KEY, '{壊れたデータ')
