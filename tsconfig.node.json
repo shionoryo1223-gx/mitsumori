@@ -6,7 +6,8 @@
     "vitest.config.*",
     "playwright*.config.*",
     "eslint.config.*",
-    "tests/e2e/**/*.ts"
+    "tests/e2e/**/*.ts",
+    "tests/smoke/**/*.ts"
   ],
   "compilerOptions": {
     // Most tools use transpilation instead of Node.js's native type-stripping.

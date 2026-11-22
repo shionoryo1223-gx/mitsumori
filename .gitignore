@@ -16,3 +16,4 @@ __screenshots__/
 .vscode/*
 !.vscode/extensions.json
 .idea
+playwright-report-smoke/

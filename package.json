@@ -12,6 +12,7 @@
                     "test":  "vitest run",
                     "e2e":  "playwright test",
                     "smoke":  "playwright test -c playwright.smoke.config.ts",
+                    "trace":  "vitest run tests/traceability.test.ts",
                     "lint":  "run-s \"lint:*\"",
                     "lint:oxlint":  "oxlint . --fix",
                     "lint:eslint":  "eslint . --fix --cache",
