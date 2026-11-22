@@ -1,10 +1,10 @@
-# mitsumori（仮称）
+# 見積もり・請求 練習帳
 
 テスト・検証エンジニア職向けに、テストの自動化を見せるためのポートフォリオ作品です。
 
 [![CI](https://github.com/shionoryo1223-gx/mitsumori/actions/workflows/ci.yml/badge.svg)](https://github.com/shionoryo1223-gx/mitsumori/actions/workflows/ci.yml)
 
-公開 URL：公開後に追加します
+公開 URL：https://mitsumori.ichimai.workers.dev
 
 ## 資料
 

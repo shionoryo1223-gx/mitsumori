@@ -14,7 +14,7 @@ function resetAll(): void {
 
 <template>
   <header class="app-header">
-    <RouterLink to="/" class="app-name">mitsumori（仮称）</RouterLink>
+    <RouterLink to="/" class="app-name">見積もり・請求 練習帳</RouterLink>
     <nav>
       <RouterLink to="/tests">テスト資料</RouterLink>
     </nav>

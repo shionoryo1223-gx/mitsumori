@@ -1,0 +1,30 @@
+name: smoke
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 09:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run smoke
+        env:
+          BASE_URL: https://mitsumori.ichimai.workers.dev
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-smoke
+          path: playwright-report-smoke/
+          if-no-files-found: ignore
