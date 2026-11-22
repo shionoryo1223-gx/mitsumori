@@ -10,6 +10,7 @@ import { countErrors, MAX_LINES, validateQuote } from '../domain/validation'
 import { allowedActions, displayStatus } from '../domain/workflow'
 import { formatDate, statusLabel } from '../format'
 import { newId } from '../ids'
+import { onSingleClick } from '../lib/clicks'
 import { useStore } from '../store'
 import NotFoundView from './NotFoundView.vue'
 
@@ -269,18 +270,18 @@ function viewInvoice(): void {
 
     <div class="actions">
       <template v-if="quote.status === 'draft'">
-        <button type="button" class="primary" :disabled="!actions.issue" @click="issue">発行</button>
-        <button type="button" @click="remove">削除</button>
+        <button type="button" class="primary" :disabled="!actions.issue" @click="onSingleClick(issue)($event)">発行</button>
+        <button type="button" @click="onSingleClick(remove)($event)">削除</button>
         <span v-if="errorCount > 0" class="reason">入力の誤りが {{ errorCount }} 件あります</span>
       </template>
       <template v-else-if="quote.status === 'issued'">
-        <button type="button" class="primary" :disabled="!actions.invoice" @click="makeInvoice">
+        <button type="button" class="primary" :disabled="!actions.invoice" @click="onSingleClick(makeInvoice)($event)">
           請求書にする
         </button>
         <span v-if="!actions.invoice" class="reason">有効期限を過ぎたため、請求書にできません</span>
       </template>
       <template v-else>
-        <button type="button" class="primary" @click="viewInvoice">請求書を見る</button>
+        <button type="button" class="primary" @click="onSingleClick(viewInvoice)($event)">請求書を見る</button>
       </template>
     </div>
 
