@@ -19,7 +19,7 @@ async function expectNoEditingButtons(edit: QuoteEditPage): Promise<void> {
 async function expectLinks(edit: QuoteEditPage): Promise<void> {
   await expect.soft
     .poll(async () => (await edit.links().allInnerTexts()).sort())
-    .toEqual(['mitsumori（仮称）', '一覧に戻る', 'テスト資料'].sort())
+    .toEqual(['見積もり・請求 練習帳', '一覧に戻る', 'テスト資料'].sort())
 }
 
 // No button or link that returns the quote to an earlier state (cancel issue, back to draft, cancel invoice).
